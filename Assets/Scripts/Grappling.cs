@@ -34,11 +34,16 @@ public class Grappling : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(grappleKey)) StartGrapple();
+        if (Input.GetKeyDown(grappleKey))
+        {
+            Debug.Log("Grapple key pressed!");
+            StartGrapple();
+        }
 
         if (grapplingCdTimer > 0)
             grapplingCdTimer -= Time.deltaTime;
     }
+
 
     private void LateUpdate()
     {
@@ -74,7 +79,10 @@ public class Grappling : MonoBehaviour
 
     private void ExecuteGrapple()
     {
+        Debug.Log("ExecuteGrapple() called");
+
         pm.freeze = false;
+        Debug.Log("Player unfrozen in ExecuteGrapple()");
 
         Vector3 lowestPoint = new Vector3(transform.position.x, transform.position.y - 1f, transform.position.z);
 
@@ -88,14 +96,24 @@ public class Grappling : MonoBehaviour
         Invoke(nameof(StopGrapple), 1f);
     }
 
+
     public void StopGrapple()
     {
-        pm.freeze = false; 
-
+        Debug.Log("StopGrapple() called");
         grappling = false;
+
         grapplingCdTimer = grapplingCd;
 
+        if (pm == null)
+        {
+            Debug.LogError("PlayerMovement reference (pm) is null!");
+            return;
+        }
+
+        pm.freeze = false;
+        Debug.Log("Player unfrozen in StopGrapple()");
     }
+
 
 
     public bool IsGrappling()
