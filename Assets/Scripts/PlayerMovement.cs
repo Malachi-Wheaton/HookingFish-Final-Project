@@ -36,9 +36,6 @@ public class PlayerMovementAdvanced : MonoBehaviour
     private RaycastHit slopeHit;
     private bool exitingSlope;
 
-    [HideInInspector]
-    public bool freeze; 
-
     public Transform orientation;
 
     float horizontalInput;
@@ -48,14 +45,19 @@ public class PlayerMovementAdvanced : MonoBehaviour
 
     Rigidbody rb;
 
+    public MovementState state;
+
     public enum MovementState
     {
         walking,
         sprinting,
         crouching,
-        air
+        air,
+        freeze,
+        grappling,
     }
-    public MovementState state;
+
+    public bool freeze;
 
     private void Start()
     {
@@ -65,7 +67,7 @@ public class PlayerMovementAdvanced : MonoBehaviour
         readyToJump = true;
         startYScale = transform.localScale.y;
 
-        freeze = false; 
+        //freeze = false; 
     }
 
     private void Update()
@@ -88,13 +90,13 @@ public class PlayerMovementAdvanced : MonoBehaviour
 
     private void MyInput()
     {
-        if (freeze) return;
-
+        
+        if (freeze)
         {
             Debug.Log("Player is frozen — input skipped");
             return;
         }
-
+        
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
 
@@ -119,6 +121,13 @@ public class PlayerMovementAdvanced : MonoBehaviour
 
     private void StateHandler()
     {
+        if (freeze)
+        {
+            state = MovementState.freeze;
+            moveSpeed = 0;
+            rb.velocity = Vector3.zero;
+        }
+        
         if (Input.GetKey(crouchKey))
         {
             state = MovementState.crouching;
@@ -142,8 +151,7 @@ public class PlayerMovementAdvanced : MonoBehaviour
 
     private void MovePlayer()
     {
-        if (freeze) return;
-
+        if (freeze)
         {
             Debug.Log("Player is frozen — movement skipped");
             return;

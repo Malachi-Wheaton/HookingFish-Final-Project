@@ -56,32 +56,31 @@ public class Grappling : MonoBehaviour
         if (grapplingCdTimer > 0) return;
 
         grappling = true;
-
         pm.freeze = true;
 
         RaycastHit hit;
         if (Physics.Raycast(cam.position, cam.forward, out hit, maxGrappleDistance, whatIsGrappleable))
         {
             grapplePoint = hit.point;
-
             Invoke(nameof(ExecuteGrapple), grappleDelayTime);
         }
         else
         {
             grapplePoint = cam.position + cam.forward * maxGrappleDistance;
-
             Invoke(nameof(StopGrapple), grappleDelayTime);
         }
-
-        //lr.enabled = true;
-        //lr.SetPosition(1, grapplePoint);
     }
+
+
+    //lr.enabled = true;
+    //lr.SetPosition(1, grapplePoint);
+
 
     private void ExecuteGrapple()
     {
-        Debug.Log("ExecuteGrapple() called");
-
         pm.freeze = false;
+
+        Debug.Log("ExecuteGrapple() called");
         Debug.Log("Player unfrozen in ExecuteGrapple()");
 
         Vector3 lowestPoint = new Vector3(transform.position.x, transform.position.y - 1f, transform.position.z);
@@ -99,6 +98,9 @@ public class Grappling : MonoBehaviour
 
     public void StopGrapple()
     {
+        pm.freeze = false;
+        Debug.Log("Player unfrozen in StopGrapple()"); 
+        
         Debug.Log("StopGrapple() called");
         grappling = false;
 
@@ -109,9 +111,6 @@ public class Grappling : MonoBehaviour
             Debug.LogError("PlayerMovement reference (pm) is null!");
             return;
         }
-
-        pm.freeze = false;
-        Debug.Log("Player unfrozen in StopGrapple()");
     }
 
 
