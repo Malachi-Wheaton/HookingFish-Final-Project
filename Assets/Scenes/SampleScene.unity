@@ -2461,7 +2461,7 @@ Transform:
   m_GameObject: {fileID: 878358169}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.976, y: 0, z: 0.79}
+  m_LocalPosition: {x: 1.07, y: 2.04, z: 1.13}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2817,7 +2817,7 @@ Transform:
   m_GameObject: {fileID: 964340974}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.09, y: 2.769, z: 1.95}
+  m_LocalPosition: {x: 18, y: 2.757, z: 21.17}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4380,7 +4380,7 @@ MonoBehaviour:
   walkSpeed: 7
   sprintSpeed: 10
   groundDrag: 5
-  jumpForce: 12
+  jumpForce: 7
   jumpCooldown: 0.25
   airMultiplier: 1
   crouchSpeed: 3.5
@@ -4393,9 +4393,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   maxSlopeAngle: 45
-  freeze: 0
   orientation: {fileID: 878358170}
   state: 0
+  freeze: 0
 --- !u!114 &1162362368
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4412,12 +4412,12 @@ MonoBehaviour:
   gunTip: {fileID: 1903485810}
   whatIsGrappleable:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 384
   lr: {fileID: 7604414461702305979}
-  maxGrappleDistance: 0
-  grappleDelayTime: 0
-  overshootYAxis: 0
-  grapplingCd: 0
+  maxGrappleDistance: 100
+  grappleDelayTime: 1.5
+  overshootYAxis: 1
+  grapplingCd: 1
   grappleKey: 324
 --- !u!1 &1479239968
 GameObject:

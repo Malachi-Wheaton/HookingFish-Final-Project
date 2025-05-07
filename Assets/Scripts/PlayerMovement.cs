@@ -38,6 +38,7 @@ public class PlayerMovementAdvanced : MonoBehaviour
 
     public Transform orientation;
 
+
     float horizontalInput;
     float verticalInput;
 
@@ -66,21 +67,21 @@ public class PlayerMovementAdvanced : MonoBehaviour
 
         readyToJump = true;
         startYScale = transform.localScale.y;
-
-        //freeze = false; 
     }
 
     private void Update()
     {
-        // ground check
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
 
         MyInput();
         SpeedControl();
         StateHandler();
 
-        // apply drag
         rb.drag = grounded ? groundDrag : 0f;
+
+        // Debug freeze state
+        Debug.Log($"Freeze: {freeze}");
+        Debug.Log("Orientation: " + orientation);
     }
 
     private void FixedUpdate()
@@ -90,13 +91,12 @@ public class PlayerMovementAdvanced : MonoBehaviour
 
     private void MyInput()
     {
-        
         if (freeze)
         {
             Debug.Log("Player is frozen — input skipped");
             return;
         }
-        
+
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
 
@@ -126,8 +126,9 @@ public class PlayerMovementAdvanced : MonoBehaviour
             state = MovementState.freeze;
             moveSpeed = 0;
             rb.velocity = Vector3.zero;
+            return; 
         }
-        
+
         if (Input.GetKey(crouchKey))
         {
             state = MovementState.crouching;
@@ -151,13 +152,12 @@ public class PlayerMovementAdvanced : MonoBehaviour
 
     private void MovePlayer()
     {
+
         if (freeze)
         {
             Debug.Log("Player is frozen — movement skipped");
             return;
         }
-
-        Debug.Log("Moving player...");
 
         moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
 
@@ -226,7 +226,6 @@ public class PlayerMovementAdvanced : MonoBehaviour
         return Vector3.ProjectOnPlane(moveDirection, slopeHit.normal).normalized;
     }
 
-    
     public void JumpToPosition(Vector3 targetPosition, float trajectoryHeight)
     {
         Vector3 velocity = CalculateJumpVelocity(transform.position, targetPosition, trajectoryHeight);
@@ -247,5 +246,6 @@ public class PlayerMovementAdvanced : MonoBehaviour
 
         return velocityXZ + velocityY;
     }
+
 }
 
