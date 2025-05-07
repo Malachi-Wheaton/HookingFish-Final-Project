@@ -3,103 +3,83 @@ using UnityEngine;
 public class Grappling : MonoBehaviour
 {
     [Header("References")]
-    private PlayerMovementAdvanced pm;
     public Transform cam;
     public Transform gunTip;
-    public LayerMask whatIsGrappleable;
-    public LineRenderer lr;
+    public LayerMask grappleableMask;
 
-    [Header("Grappling")]
+    private PlayerMovement pm;
+
+    [Header("Grappling Settings")]
     public float maxGrappleDistance = 40f;
-    public float grappleDelayTime = 0.1f;
-    public float overshootYAxis = 5f;
+    public float grappleDelay = 0.1f;
+    public float overshootY = 5f;
+    public float cooldown = 2f;
 
     private Vector3 grapplePoint;
+    private bool isGrappling;
+    private float cooldownTimer;
 
-    [Header("Cooldown")]
-    public float grapplingCd = 2f;
-    private float grapplingCdTimer;
-
-    [Header("Input")]
     public KeyCode grappleKey = KeyCode.Mouse1;
-
-    private bool grappling;
 
     private void Start()
     {
-        pm = GetComponent<PlayerMovementAdvanced>();
+        pm = GetComponent<PlayerMovement>();
         if (pm == null)
-            Debug.LogError("Grappling: PlayerMovementAdvanced reference not found.");
+            Debug.LogError("Grappling: PlayerMovement reference is missing!");
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(grappleKey))
+        if (Input.GetKeyDown(grappleKey) && cooldownTimer <= 0 && !isGrappling)
         {
-            TryStartGrapple();
+            StartGrapple();
         }
 
-        if (grapplingCdTimer > 0f)
-            grapplingCdTimer -= Time.deltaTime;
+        if (cooldownTimer > 0)
+            cooldownTimer -= Time.deltaTime;
     }
 
-    private void TryStartGrapple()
+    private void StartGrapple()
     {
-        if (grapplingCdTimer > 0f || grappling)
+        if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, maxGrappleDistance, grappleableMask))
         {
-            Debug.Log("Grappling: On cooldown or already grappling.");
-            return;
-        }
-
-        RaycastHit hit;
-        if (Physics.Raycast(cam.position, cam.forward, out hit, maxGrappleDistance, whatIsGrappleable))
-        {
+            Debug.Log("Grapple hit: " + hit.collider.name);
             grapplePoint = hit.point;
-            grappling = true;
+            isGrappling = true;
             pm.freeze = true;
-            Debug.Log("Grapple started. Will execute in delay.");
-            Invoke(nameof(ExecuteGrapple), grappleDelayTime);
+
+            Invoke(nameof(ExecuteGrapple), grappleDelay);
         }
         else
         {
-            Debug.Log("No grappleable surface hit.");
-            // Optional: play error sound or animation
+            Debug.Log("Grapple failed: no target");
         }
     }
 
     private void ExecuteGrapple()
     {
         pm.freeze = false;
-        Debug.Log("Executing Grapple. Launching to point.");
 
         Vector3 lowestPoint = new Vector3(transform.position.x, transform.position.y - 1f, transform.position.z);
-        float grapplePointRelativeYPos = grapplePoint.y - lowestPoint.y;
+        float relativeY = grapplePoint.y - lowestPoint.y;
+        float arcHeight = relativeY < 0 ? overshootY : relativeY + overshootY;
 
-        float highestPointOnArc = grapplePointRelativeYPos + overshootYAxis;
-        if (grapplePointRelativeYPos < 0) highestPointOnArc = overshootYAxis;
+        Debug.Log($"Launching to {grapplePoint}, arc height = {arcHeight}");
+        pm.JumpToPosition(grapplePoint, arcHeight);
 
-        pm.JumpToPosition(grapplePoint, highestPointOnArc);
-        Invoke(nameof(StopGrapple), 1f); // Adjust timing based on jump arc duration
+        Invoke(nameof(StopGrapple), 1f);
     }
 
-    public void StopGrapple()
+    private void StopGrapple()
     {
-        Debug.Log("Grapple finished. Resetting state.");
+        isGrappling = false;
         pm.freeze = false;
-        grappling = false;
-        grapplingCdTimer = grapplingCd;
-
-        // Optionally reset LineRenderer
-        // lr.enabled = false;
+        cooldownTimer = cooldown;
+        Debug.Log("Grapple ended.");
     }
 
-    public bool IsGrappling()
-    {
-        return grappling;
-    }
-
-    public Vector3 GetGrapplePoint()
-    {
-        return grapplePoint;
-    }
+    public bool IsGrappling() => isGrappling;
+    public Vector3 GetGrapplePoint() => grapplePoint;
 }
+
+
