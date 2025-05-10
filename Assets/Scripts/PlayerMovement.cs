@@ -1,9 +1,9 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerMovement : MonoBehaviour
+public class AdvancedFirstPersonController : MonoBehaviour
 {
     [Header("Movement")]
     private float moveSpeed;
@@ -37,51 +37,41 @@ public class PlayerMovement : MonoBehaviour
     private RaycastHit slopeHit;
     private bool exitingSlope;
 
+    [Header("Camera Orientation")]
     public Transform orientation;
 
     private float horizontalInput;
     private float verticalInput;
     private Vector3 moveDirection;
-
     private Rigidbody rb;
 
-    public enum MovementState
-    {
-        walking,
-        sprinting,
-        crouching,
-        air
-    }
+    public enum MovementState { walking, sprinting, crouching, air }
     public MovementState state;
 
-    private void Start()
+    void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
-
         startYScale = transform.localScale.y;
-        readyToJump = true;
     }
 
-    private void Update()
+    void Update()
     {
-        // Ground check
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.3f, whatIsGround);
-        Debug.DrawRay(transform.position, Vector3.down * (playerHeight * 0.5f + 0.3f), grounded ? Color.green : Color.red);
 
         MyInput();
-        SpeedControl();
         StateHandler();
+        SpeedControl();
 
         rb.drag = grounded ? groundDrag : 0f;
     }
 
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         MovePlayer();
     }
 
-    private void MyInput()
+    void MyInput()
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
@@ -105,7 +95,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void StateHandler()
+    void StateHandler()
     {
         if (Input.GetKey(crouchKey))
         {
@@ -128,14 +118,8 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void MovePlayer()
+    void MovePlayer()
     {
-        if (orientation == null)
-        {
-            Debug.LogError("Orientation is not assigned!");
-            return;
-        }
-
         moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
         moveDirection.Normalize();
 
@@ -157,38 +141,36 @@ public class PlayerMovement : MonoBehaviour
         rb.useGravity = !OnSlope();
     }
 
-    private void SpeedControl()
+    void SpeedControl()
     {
+        Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+
         if (OnSlope() && !exitingSlope)
         {
             if (rb.velocity.magnitude > moveSpeed)
                 rb.velocity = rb.velocity.normalized * moveSpeed;
         }
-        else
+        else if (flatVel.magnitude > moveSpeed)
         {
-            Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-            if (flatVel.magnitude > moveSpeed)
-            {
-                Vector3 limitedVel = flatVel.normalized * moveSpeed;
-                rb.velocity = new Vector3(limitedVel.x, rb.velocity.y, limitedVel.z);
-            }
+            Vector3 limitedVel = flatVel.normalized * moveSpeed;
+            rb.velocity = new Vector3(limitedVel.x, rb.velocity.y, limitedVel.z);
         }
     }
 
-    private void Jump()
+    void Jump()
     {
         exitingSlope = true;
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
-    private void ResetJump()
+    void ResetJump()
     {
         readyToJump = true;
         exitingSlope = false;
     }
 
-    private bool OnSlope()
+    bool OnSlope()
     {
         if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, playerHeight * 0.5f + 0.3f))
         {
@@ -198,9 +180,8 @@ public class PlayerMovement : MonoBehaviour
         return false;
     }
 
-    private Vector3 GetSlopeMoveDirection()
+    Vector3 GetSlopeMoveDirection()
     {
         return Vector3.ProjectOnPlane(moveDirection, slopeHit.normal).normalized;
     }
 }
-
