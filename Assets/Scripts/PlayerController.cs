@@ -17,6 +17,9 @@ public class PlayerController : MonoBehaviour
     private float xRotation = 0f;
     private bool isGrounded;
 
+    // ✅ Add this reference to hook the UI Manager in the Inspector
+    public GameUIManager uiManager;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -35,6 +38,7 @@ public class PlayerController : MonoBehaviour
             Jump();
         }
     }
+
     void LateUpdate()
     {
         LookAround();
@@ -65,7 +69,7 @@ public class PlayerController : MonoBehaviour
 
     void Jump()
     {
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z); 
+        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
@@ -99,6 +103,11 @@ public class PlayerController : MonoBehaviour
 
     void Die()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        // ✅ Show Game Over Panel instead of reloading the scene
+        if (uiManager != null)
+            uiManager.ShowGameOverScreen();
+        else
+            Debug.LogWarning("UI Manager not assigned in PlayerController!");
     }
 }
+
